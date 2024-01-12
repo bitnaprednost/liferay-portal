@@ -163,7 +163,7 @@ public class DDMFormPortlet extends MVCPortlet {
 			setRenderRequestAttributes(renderRequest, renderResponse);
 
 			DDMFormDisplayContext ddmFormDisplayContext =
-				(DDMFormDisplayContext) renderRequest.getAttribute(
+				(DDMFormDisplayContext)renderRequest.getAttribute(
 					WebKeys.PORTLET_DISPLAY_CONTEXT);
 
 			String uuid = httpServletRequest.getParameter("uuid");
@@ -175,8 +175,8 @@ public class DDMFormPortlet extends MVCPortlet {
 				}
 
 				if ((DDMFormInstanceSubmissionLimitStatusUtil.
-						 isLimitToOneSubmissionPerUser(
-							 ddmFormDisplayContext.getFormInstance()) &&
+						isLimitToOneSubmissionPerUser(
+							ddmFormDisplayContext.getFormInstance()) &&
 					 !ddmFormDisplayContext.isLoggedUser()) ||
 					(ddmFormDisplayContext.isRequireAuthentication() &&
 					 ddmFormDisplayContext.isSharedURL())) {
@@ -192,7 +192,8 @@ public class DDMFormPortlet extends MVCPortlet {
 
 					return;
 				}
-			} else {
+			}
+			else {
 				renderRequest.setAttribute(
 					getMVCPathAttributeName(renderResponse.getNamespace()),
 					"/display/edit_form_instance_record.jsp");

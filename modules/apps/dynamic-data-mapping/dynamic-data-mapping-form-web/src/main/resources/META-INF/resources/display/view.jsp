@@ -19,6 +19,7 @@
 <%
 long formInstanceId = ddmFormDisplayContext.getFormInstanceId();
 boolean limitToOneSubmissionPerUser = DDMFormInstanceSubmissionLimitStatusUtil.isLimitToOneSubmissionPerUser(ddmFormDisplayContext.getFormInstance());
+boolean showSuccessPage = ddmFormDisplayContext.isShowSuccessPage();
 %>
 
 <c:choose>
@@ -57,6 +58,16 @@ boolean limitToOneSubmissionPerUser = DDMFormInstanceSubmissionLimitStatusUtil.i
 			</clay:container-fluid>
 		</div>
 	</c:when>
+	<c:when test="<%= DDMFormInstanceSubmissionLimitStatusUtil.isMaxSubmissionsLimitReached(ddmFormDisplayContext.getFormInstance()) && !showSuccessPage %>">
+		<div class="ddm-form-basic-info">
+			<clay:container-fluid>
+				<clay:alert
+					displayType="warning"
+					message="the-form-submission-limit-reached"
+				/>
+			</clay:container-fluid>
+		</div>
+	</c:when>
 	<c:otherwise>
 		<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" id="/dynamic_data_mapping_form/get_form_report_data" var="formReportDataURL">
 			<portlet:param name="formInstanceId" value="<%= String.valueOf(formInstanceId) %>" />
@@ -70,7 +81,6 @@ boolean limitToOneSubmissionPerUser = DDMFormInstanceSubmissionLimitStatusUtil.i
 		boolean formAvailable = ddmFormDisplayContext.isFormAvailable();
 		boolean formShared = ddmFormDisplayContext.isFormShared();
 		boolean preview = ddmFormDisplayContext.isPreview();
-		boolean showSuccessPage = ddmFormDisplayContext.isShowSuccessPage();
 
 		String languageId = ddmFormDisplayContext.getDefaultLanguageId();
 

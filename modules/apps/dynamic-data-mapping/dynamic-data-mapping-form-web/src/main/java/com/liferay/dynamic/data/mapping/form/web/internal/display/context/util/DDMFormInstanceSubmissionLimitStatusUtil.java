@@ -17,6 +17,7 @@ package com.liferay.dynamic.data.mapping.form.web.internal.display.context.util;
 import com.liferay.dynamic.data.mapping.model.DDMFormInstance;
 import com.liferay.dynamic.data.mapping.model.DDMFormInstanceRecordVersion;
 import com.liferay.dynamic.data.mapping.model.DDMFormInstanceSettings;
+import com.liferay.dynamic.data.mapping.service.DDMFormInstanceRecordLocalServiceUtil;
 import com.liferay.dynamic.data.mapping.service.DDMFormInstanceRecordVersionLocalService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.User;
@@ -41,6 +42,34 @@ public class DDMFormInstanceSubmissionLimitStatusUtil {
 			ddmFormInstance.getSettingsModel();
 
 		return ddmFormInstanceSettings.limitToOneSubmissionPerUser();
+	}
+
+	public static boolean isMaxSubmissionsLimitReached(
+			DDMFormInstance ddmFormInstance)
+		throws PortalException {
+
+		if (ddmFormInstance == null) {
+			return false;
+		}
+
+		DDMFormInstanceSettings ddmFormInstanceSettings =
+			ddmFormInstance.getSettingsModel();
+
+		if (ddmFormInstanceSettings.unlimitedSubmissions()) {
+			return false;
+		}
+
+		int ddmFormInstanceRecordsCount =
+			DDMFormInstanceRecordLocalServiceUtil.getFormInstanceRecordsCount(
+				ddmFormInstance.getFormInstanceId());
+
+		if (ddmFormInstanceRecordsCount >=
+				ddmFormInstanceSettings.maxSubmissions()) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	public static boolean isSubmissionLimitReached(

@@ -453,8 +453,8 @@ public class DDMFormDisplayContext {
 			ServiceContextThreadLocal.getServiceContext();
 
 		_ddmFormInstanceRecord =
-			_ddmFormInstanceRecordLocalService
-				.getDDMFormInstanceRecordByUuidAndGroupId(
+			_ddmFormInstanceRecordLocalService.
+				getDDMFormInstanceRecordByUuidAndGroupId(
 					uuid, serviceContext.getScopeGroupId());
 
 		return _ddmFormInstanceRecord.getFormInstanceRecordId();
