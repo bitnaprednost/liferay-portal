@@ -31,6 +31,7 @@ import org.osgi.annotation.versioning.ProviderType;
 	rules = {
 		@DDMFormRule(
 			actions = {
+				"setEnabled('maxSubmissions', equals(getValue('unlimitedSubmissions'), FALSE))",
 				"setEnabled('expirationDate', equals(getValue('neverExpire'), FALSE))",
 				"setVisible('emailFromAddress', getValue('sendEmailNotification'))",
 				"setVisible('emailFromName', getValue('sendEmailNotification'))",
@@ -47,6 +48,10 @@ import org.osgi.annotation.versioning.ProviderType;
 		@DDMFormRule(
 			actions = "setValue('expirationDate', '')",
 			condition = "equals(getValue('neverExpire'), TRUE)"
+		),
+		@DDMFormRule(
+			actions = "setValue('maxSubmissions', '')",
+			condition = "equals(getValue('unlimitedSubmissions'), TRUE)"
 		)
 	}
 )
@@ -114,6 +119,19 @@ import org.osgi.annotation.versioning.ProviderType;
 								"limitToOneSubmissionPerUserBody",
 								"expirationDate", "neverExpire"
 							}
+						)
+					}
+				)
+			}
+		),
+		@DDMFormLayoutPage(
+			title = "%hnb-settings",
+			value = {
+				@DDMFormLayoutRow(
+					{
+						@DDMFormLayoutColumn(
+							size = 12,
+							value = {"maxSubmissions", "unlimitedSubmissions"}
 						)
 					}
 				)
@@ -192,6 +210,9 @@ public interface DDMFormInstanceSettings {
 	)
 	public String limitToOneSubmissionPerUserHeader();
 
+	@DDMFormField(label = "%form-submission-limit", type = "numeric")
+	public int maxSubmissions();
+
 	@DDMFormField(
 		label = "%never-expire", predefinedValue = "true", type = "checkbox"
 	)
@@ -257,6 +278,11 @@ public interface DDMFormInstanceSettings {
 		type = "localizable_text"
 	)
 	public String submitLabel();
+
+	@DDMFormField(
+		label = "%unlimited", predefinedValue = "true", type = "checkbox"
+	)
+	public boolean unlimitedSubmissions();
 
 	@DDMFormField(
 		label = "%select-a-workflow", predefinedValue = "[\"no-workflow\"]",
