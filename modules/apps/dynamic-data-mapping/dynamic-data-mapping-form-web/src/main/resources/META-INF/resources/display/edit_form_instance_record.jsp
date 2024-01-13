@@ -30,58 +30,69 @@ if (formInstanceRecord != null) {
 }
 
 portletDisplay.setURLBack(redirect);
-portletDisplay.setShowBackIcon(true);
+portletDisplay.setShowBackIcon(false);
 
 String title = ParamUtil.getString(request, "title");
 
 renderResponse.setTitle(GetterUtil.get(title, LanguageUtil.get(request, "view-form")));
 %>
 
-<clay:container-fluid>
-	<c:if test="<%= formInstanceRecordVersion != null %>">
-		<aui:model-context bean="<%= formInstanceRecordVersion %>" model="<%= DDMFormInstanceRecordVersion.class %>" />
+<c:choose>
+	<c:when test="<%= DDMFormInstanceExpirationStatusUtil.isFormExpired(formInstance, timeZone) %>">
+		<clay:stripe
+			dismissible="<%= true %>"
+			displayType="warning"
+			message="the-form-is-expired-and-is-no-longer-available-for-editing-or-submitting-new-answers"
+		/>
+	</c:when>
+	<c:otherwise>
+		<clay:container-fluid>
+			<c:if test="<%= formInstanceRecordVersion != null %>">
+				<aui:model-context bean="<%= formInstanceRecordVersion %>" model="<%= DDMFormInstanceRecordVersion.class %>" />
 
-		<div class="panel text-center">
-			<aui:workflow-status markupView="lexicon" model="<%= DDMFormInstanceRecord.class %>" showHelpMessage="<%= false %>" showIcon="<%= false %>" showLabel="<%= false %>" status="<%= formInstanceRecordVersion.getStatus() %>" version="<%= formInstanceRecordVersion.getVersion() %>" />
-		</div>
-	</c:if>
-</clay:container-fluid>
+				<!--<div class="panel text-center">
+					<aui:workflow-status markupView="lexicon" model="<%= DDMFormInstanceRecord.class %>" showHelpMessage="<%= false %>" showIcon="<%= false %>" showLabel="<%= false %>" status="<%= formInstanceRecordVersion.getStatus() %>" version="<%= formInstanceRecordVersion.getVersion() %>" />
+				</div>-->
+			</c:if>
+		</clay:container-fluid>
 
-<clay:container-fluid
-	cssClass="ddm-form-builder-app editing-form-entry"
->
-	<portlet:actionURL name="/dynamic_data_mapping_form/add_form_instance_record" var="editFormInstanceRecordActionURL" />
+		<clay:container-fluid
+			cssClass="ddm-form-builder-app editing-form-entry"
+		>
+			<portlet:actionURL name="/dynamic_data_mapping_form/add_form_instance_record" var="editFormInstanceRecordActionURL" />
 
-	<aui:form action="<%= editFormInstanceRecordActionURL %>" data-DDMFormInstanceId="<%= ddmFormDisplayContext.getFormInstanceId() %>" data-senna-off="true" method="post" name="fm">
-		<aui:input name="redirect" type="hidden" value="<%= redirect %>" />
-		<aui:input name="formInstanceRecordId" type="hidden" value="<%= ddmFormDisplayContext.getFormInstanceRecordId() %>" />
-		<aui:input name="formInstanceId" type="hidden" value="<%= ddmFormDisplayContext.getFormInstanceId() %>" />
-		<aui:input name="defaultLanguageId" type="hidden" value='<%= ParamUtil.getString(request, "defaultLanguageId") %>' />
+			<aui:form action="<%= editFormInstanceRecordActionURL %>" data-DDMFormInstanceId="<%= ddmFormDisplayContext.getFormInstanceId() %>" data-senna-off="true" method="post" name="fm">
+				<aui:input name="redirect" type="hidden" value="<%= redirect %>" />
+				<aui:input name="formInstanceRecordId" type="hidden" value="<%= ddmFormDisplayContext.getFormInstanceRecordId() %>" />
+				<aui:input name="formInstanceId" type="hidden" value="<%= ddmFormDisplayContext.getFormInstanceId() %>" />
+				<aui:input name="defaultLanguageId" type="hidden" value='<%= ParamUtil.getString(request, "defaultLanguageId") %>' />
 
-		<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" id="/dynamic_data_mapping_form/validate_csrf_token" var="validateCSRFTokenURL" />
+				<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" id="/dynamic_data_mapping_form/validate_csrf_token" var="validateCSRFTokenURL" />
 
-		<div id=<%= ddmFormDisplayContext.getContainerId() %>>
+				<div id=<%= ddmFormDisplayContext.getContainerId() %>>
 
-			<%
-			String languageId = ddmFormDisplayContext.getDefaultLanguageId();
+					<%
+					String languageId = ddmFormDisplayContext.getDefaultLanguageId();
 
-			Locale displayLocale = LocaleUtil.fromLanguageId(languageId);
-			%>
+					Locale displayLocale = LocaleUtil.fromLanguageId(languageId);
+					%>
 
-			<react:component
-				module="admin/js/FormView"
-				props='<%=
-					HashMapBuilder.<String, Object>put(
-						"description", formInstance.getDescription(displayLocale)
-					).put(
-						"title", formInstance.getName(displayLocale)
-					).put(
-						"validateCSRFTokenURL", validateCSRFTokenURL.toString()
-					).putAll(
-						ddmFormDisplayContext.getDDMFormContext()
-					).build()
-				%>'
-			/>
-		</div>
-	</aui:form>
-</clay:container-fluid>
+					<react:component
+						module="admin/js/FormView"
+						props='<%=
+							HashMapBuilder.<String, Object>put(
+								"description", formInstance.getDescription(displayLocale)
+							).put(
+								"title", formInstance.getName(displayLocale)
+							).put(
+								"validateCSRFTokenURL", validateCSRFTokenURL.toString()
+							).putAll(
+								ddmFormDisplayContext.getDDMFormContext()
+							).build()
+						%>'
+					/>
+				</div>
+			</aui:form>
+		</clay:container-fluid>
+	</c:otherwise>
+</c:choose>

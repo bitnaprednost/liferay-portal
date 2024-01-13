@@ -25,6 +25,7 @@ import com.liferay.dynamic.data.mapping.form.web.internal.display.context.util.D
 import com.liferay.dynamic.data.mapping.form.web.internal.util.DDMLayoutUtil;
 import com.liferay.dynamic.data.mapping.model.DDMFormInstance;
 import com.liferay.dynamic.data.mapping.service.DDMFormInstanceLocalService;
+import com.liferay.dynamic.data.mapping.service.DDMFormInstanceRecordLocalService;
 import com.liferay.dynamic.data.mapping.service.DDMFormInstanceRecordService;
 import com.liferay.dynamic.data.mapping.service.DDMFormInstanceRecordVersionLocalService;
 import com.liferay.dynamic.data.mapping.service.DDMFormInstanceService;
@@ -52,6 +53,7 @@ import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.URLCodec;
 import com.liferay.portal.kernel.util.WebKeys;
 
@@ -65,6 +67,7 @@ import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.osgi.service.component.annotations.Activate;
@@ -153,34 +156,46 @@ public class DDMFormPortlet extends MVCPortlet {
 		throws IOException, PortletException {
 
 		try {
+			HttpServletRequest httpServletRequest =
+				PortalUtil.getOriginalServletRequest(
+					PortalUtil.getHttpServletRequest(renderRequest));
+
 			setRenderRequestAttributes(renderRequest, renderResponse);
 
 			DDMFormDisplayContext ddmFormDisplayContext =
-				(DDMFormDisplayContext)renderRequest.getAttribute(
+				(DDMFormDisplayContext) renderRequest.getAttribute(
 					WebKeys.PORTLET_DISPLAY_CONTEXT);
 
-			if (ddmFormDisplayContext.isFormShared()) {
-				_saveRefererGroupIdInRequest(
-					renderRequest, ddmFormDisplayContext);
-			}
+			String uuid = httpServletRequest.getParameter("uuid");
 
-			if ((DDMFormInstanceSubmissionLimitStatusUtil.
-					isLimitToOneSubmissionPerUser(
-						ddmFormDisplayContext.getFormInstance()) &&
-				 !ddmFormDisplayContext.isLoggedUser()) ||
-				(ddmFormDisplayContext.isRequireAuthentication() &&
-				 ddmFormDisplayContext.isSharedURL())) {
+			if (uuid == null) {
+				if (ddmFormDisplayContext.isFormShared()) {
+					_saveRefererGroupIdInRequest(
+						renderRequest, ddmFormDisplayContext);
+				}
 
-				HttpServletResponse httpServletResponse =
-					_portal.getHttpServletResponse(renderResponse);
+				if ((DDMFormInstanceSubmissionLimitStatusUtil.
+						 isLimitToOneSubmissionPerUser(
+							 ddmFormDisplayContext.getFormInstance()) &&
+					 !ddmFormDisplayContext.isLoggedUser()) ||
+					(ddmFormDisplayContext.isRequireAuthentication() &&
+					 ddmFormDisplayContext.isSharedURL())) {
 
-				httpServletResponse.sendRedirect(
-					StringBundler.concat(
-						_portal.getPathMain(), "/portal/login?redirect=",
-						URLCodec.encodeURL(
-							_portal.getCurrentURL(renderRequest))));
+					HttpServletResponse httpServletResponse =
+						_portal.getHttpServletResponse(renderResponse);
 
-				return;
+					httpServletResponse.sendRedirect(
+						StringBundler.concat(
+							_portal.getPathMain(), "/portal/login?redirect=",
+							URLCodec.encodeURL(
+								_portal.getCurrentURL(renderRequest))));
+
+					return;
+				}
+			} else {
+				renderRequest.setAttribute(
+					getMVCPathAttributeName(renderResponse.getNamespace()),
+					"/display/edit_form_instance_record.jsp");
 			}
 		}
 		catch (Exception exception) {
@@ -223,7 +238,7 @@ public class DDMFormPortlet extends MVCPortlet {
 
 		DDMFormDisplayContext ddmFormDisplayContext = new DDMFormDisplayContext(
 			_ddmFormFieldTypeServicesRegistry, _ddmFormInstanceLocalService,
-			_ddmFormInstanceRecordService,
+			_ddmFormInstanceRecordLocalService, _ddmFormInstanceRecordService,
 			_ddmFormInstanceRecordVersionLocalService, _ddmFormInstanceService,
 			_ddmFormInstanceVersionLocalService, _ddmFormRenderer,
 			_ddmFormValuesFactory, _ddmFormValuesMerger,
@@ -280,6 +295,10 @@ public class DDMFormPortlet extends MVCPortlet {
 
 	@Reference
 	private DDMFormInstanceLocalService _ddmFormInstanceLocalService;
+
+	@Reference
+	private DDMFormInstanceRecordLocalService
+		_ddmFormInstanceRecordLocalService;
 
 	@Reference
 	private DDMFormInstanceRecordService _ddmFormInstanceRecordService;

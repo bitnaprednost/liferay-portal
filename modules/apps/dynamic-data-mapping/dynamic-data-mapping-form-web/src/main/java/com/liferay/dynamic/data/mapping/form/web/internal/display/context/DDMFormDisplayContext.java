@@ -40,6 +40,7 @@ import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.model.DDMStructureVersion;
 import com.liferay.dynamic.data.mapping.model.LocalizedValue;
 import com.liferay.dynamic.data.mapping.service.DDMFormInstanceLocalService;
+import com.liferay.dynamic.data.mapping.service.DDMFormInstanceRecordLocalService;
 import com.liferay.dynamic.data.mapping.service.DDMFormInstanceRecordService;
 import com.liferay.dynamic.data.mapping.service.DDMFormInstanceRecordVersionLocalService;
 import com.liferay.dynamic.data.mapping.service.DDMFormInstanceService;
@@ -74,6 +75,8 @@ import com.liferay.portal.kernel.model.role.RoleConstants;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.RoleLocalService;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.service.WorkflowDefinitionLinkLocalService;
 import com.liferay.portal.kernel.service.permission.PortletPermissionUtil;
@@ -120,6 +123,7 @@ public class DDMFormDisplayContext {
 	public DDMFormDisplayContext(
 		DDMFormFieldTypeServicesRegistry ddmFormFieldTypeServicesRegistry,
 		DDMFormInstanceLocalService ddmFormInstanceLocalService,
+		DDMFormInstanceRecordLocalService ddmFormInstanceRecordLocalService,
 		DDMFormInstanceRecordService ddmFormInstanceRecordService,
 		DDMFormInstanceRecordVersionLocalService
 			ddmFormInstanceRecordVersionLocalService,
@@ -142,6 +146,7 @@ public class DDMFormDisplayContext {
 
 		_ddmFormFieldTypeServicesRegistry = ddmFormFieldTypeServicesRegistry;
 		_ddmFormInstanceLocalService = ddmFormInstanceLocalService;
+		_ddmFormInstanceRecordLocalService = ddmFormInstanceRecordLocalService;
 		_ddmFormInstanceRecordService = ddmFormInstanceRecordService;
 		_ddmFormInstanceRecordVersionLocalService =
 			ddmFormInstanceRecordVersionLocalService;
@@ -427,14 +432,32 @@ public class DDMFormDisplayContext {
 		return _ddmFormInstanceRecord;
 	}
 
-	public long getFormInstanceRecordId() {
+	public long getFormInstanceRecordId() throws PortalException {
 		if (_ddmFormInstanceRecordId != 0) {
 			return _ddmFormInstanceRecordId;
 		}
 
-		return PrefsParamUtil.getLong(
-			_renderRequest.getPreferences(), _renderRequest,
-			"formInstanceRecordId");
+		HttpServletRequest httpServletRequest =
+			PortalUtil.getOriginalServletRequest(
+				PortalUtil.getHttpServletRequest(_renderRequest));
+
+		String uuid = httpServletRequest.getParameter("uuid");
+
+		if (uuid == null) {
+			return PrefsParamUtil.getLong(
+				_renderRequest.getPreferences(), _renderRequest,
+				"formInstanceRecordId");
+		}
+
+		ServiceContext serviceContext =
+			ServiceContextThreadLocal.getServiceContext();
+
+		_ddmFormInstanceRecord =
+			_ddmFormInstanceRecordLocalService
+				.getDDMFormInstanceRecordByUuidAndGroupId(
+					uuid, serviceContext.getScopeGroupId());
+
+		return _ddmFormInstanceRecord.getFormInstanceRecordId();
 	}
 
 	public Map<String, String> getLimitToOneSubmissionPerUserMap()
@@ -1220,6 +1243,8 @@ public class DDMFormDisplayContext {
 	private final DDMFormInstanceLocalService _ddmFormInstanceLocalService;
 	private DDMFormInstanceRecord _ddmFormInstanceRecord;
 	private long _ddmFormInstanceRecordId;
+	private final DDMFormInstanceRecordLocalService
+		_ddmFormInstanceRecordLocalService;
 	private final DDMFormInstanceRecordService _ddmFormInstanceRecordService;
 	private final DDMFormInstanceRecordVersionLocalService
 		_ddmFormInstanceRecordVersionLocalService;

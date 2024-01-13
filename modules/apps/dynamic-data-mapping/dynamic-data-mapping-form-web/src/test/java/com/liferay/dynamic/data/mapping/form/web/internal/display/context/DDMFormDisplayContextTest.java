@@ -27,6 +27,7 @@ import com.liferay.dynamic.data.mapping.model.DDMFormSuccessPageSettings;
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.model.impl.DDMFormInstanceImpl;
 import com.liferay.dynamic.data.mapping.service.DDMFormInstanceLocalService;
+import com.liferay.dynamic.data.mapping.service.DDMFormInstanceRecordLocalService;
 import com.liferay.dynamic.data.mapping.service.DDMFormInstanceRecordService;
 import com.liferay.dynamic.data.mapping.service.DDMFormInstanceRecordVersionLocalService;
 import com.liferay.dynamic.data.mapping.service.DDMFormInstanceService;
@@ -742,6 +743,7 @@ public class DDMFormDisplayContextTest {
 		return new DDMFormDisplayContext(
 			Mockito.mock(DDMFormFieldTypeServicesRegistry.class),
 			_ddmFormInstanceLocalService,
+			Mockito.mock(DDMFormInstanceRecordLocalService.class),
 			Mockito.mock(DDMFormInstanceRecordService.class),
 			Mockito.mock(DDMFormInstanceRecordVersionLocalService.class),
 			_ddmFormInstanceService, _mockDDMFormInstanceVersionLocalService(),
