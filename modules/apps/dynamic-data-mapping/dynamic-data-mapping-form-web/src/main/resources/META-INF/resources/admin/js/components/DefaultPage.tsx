@@ -69,14 +69,14 @@ const DefaultPage: React.FC<IProps> = ({
 						</p>
 
 						<div className="lfr-ddm__default-page-buttons">
-							{showSubmitAgainButton && (
-								<ClayButton
-									displayType="secondary"
-									onClick={() => window.location.reload()}
-								>
-									{Liferay.Language.get('submit-again')}
-								</ClayButton>
-							)}
+							{/*{showSubmitAgainButton && (*/}
+							{/*	<ClayButton*/}
+							{/*		displayType="secondary"*/}
+							{/*		onClick={() => window.location.reload()}*/}
+							{/*	>*/}
+							{/*		{Liferay.Language.get('submit-again')}*/}
+							{/*	</ClayButton>*/}
+							{/*)}*/}
 
 							{showPartialResultsToRespondents &&
 								formReportDataURL && (
