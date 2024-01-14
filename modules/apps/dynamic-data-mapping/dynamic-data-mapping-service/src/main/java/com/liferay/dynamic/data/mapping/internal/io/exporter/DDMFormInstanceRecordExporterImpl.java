@@ -126,6 +126,7 @@ public class DDMFormInstanceRecordExporterImpl
 		ddmFormFieldsLabel.put(
 			_KEY_MODIFIED_DATE, _language.get(locale, "modified-date"));
 		ddmFormFieldsLabel.put(_KEY_STATUS, _language.get(locale, _KEY_STATUS));
+		ddmFormFieldsLabel.put(_KEY_UUID, _language.get(locale, _KEY_UUID));
 
 		return ddmFormFieldsLabel;
 	}
@@ -211,6 +212,8 @@ public class DDMFormInstanceRecordExporterImpl
 				_KEY_STATUS,
 				getStatusMessage(
 					ddmFormInstanceRecordVersion.getStatus(), locale));
+			ddmFormFieldsValue.put(
+				_KEY_UUID, ddmFormInstanceRecord.getUuid());
 
 			ddmFormFieldValues.add(ddmFormFieldsValue);
 		}
@@ -321,6 +324,8 @@ public class DDMFormInstanceRecordExporterImpl
 	private static final String _KEY_MODIFIED_DATE = "modifiedDate";
 
 	private static final String _KEY_STATUS = "status";
+
+	private static final String _KEY_UUID = "uuid";
 
 	@Reference
 	private Html _html;
